@@ -2,13 +2,14 @@
 // The main "Discover" page of the Recipe Finder app.
 //
 // What this page does:
-//   1. Shows a hero banner with the search bar
-//   2. Lets the user filter results by category using FilterBar
-//   3. Fetches recipes from TheMealDB API when the user searches
-//   4. Displays results as RecipeCard components in a responsive grid
-//   5. Handles loading, error, and empty states with helpful UI
-//   6. "Load More" button to paginate through results
-//   7. Opens a RecipeModal when the user clicks a card
+//   1. AUTO-LOADS popular recipes on first visit (useEffect on mount)
+//   2. Shows a hero banner with the search bar
+//   3. Lets the user filter results by category using FilterBar
+//   4. Fetches recipes from TheMealDB API when the user searches
+//   5. Displays results as RecipeCard components in a responsive grid
+//   6. Handles loading, error, and empty states with helpful UI
+//   7. "Load More" button to paginate through results
+//   8. Opens a RecipeModal when the user clicks a card
 
 import { useState, useEffect } from 'react';
 import SearchBar from '../components/SearchBar';
@@ -22,9 +23,14 @@ import './Home.css';
 const PAGE_SIZE = 12;
 
 // TheMealDB free API — no key required!
-// Search by name: https://www.themealdb.com/api/json/v1/1/search.php?s=pasta
-// Full details:   https://www.themealdb.com/api/json/v1/1/lookup.php?i=52772
+// Search by name:    https://www.themealdb.com/api/json/v1/1/search.php?s=pasta
+// By category:      https://www.themealdb.com/api/json/v1/1/filter.php?c=Chicken
+// Full details:     https://www.themealdb.com/api/json/v1/1/lookup.php?i=52772
 const API_BASE = 'https://www.themealdb.com/api/json/v1/1';
+
+// Popular search terms we use to load recipes on the home page automatically.
+// We fetch a few different categories so users see variety right away.
+const POPULAR_TERMS = ['chicken', 'pasta', 'beef', 'seafood', 'dessert', 'vegetarian'];
 
 // Props passed down from App.jsx:
 //   isFavorite(mealId)     — check if a recipe is in favorites
@@ -45,10 +51,59 @@ function Home({ isFavorite, onToggleFav }) {
   // The full detail data for the recipe the user clicked — shown in the modal
   const [selectedMeal, setSelectedMeal] = useState(null);
 
+  // true when showing auto-loaded popular recipes (vs. a user search)
+  const [isShowingPopular, setIsShowingPopular] = useState(false);
+
   // UI states
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [hasSearched, setHasSearched] = useState(false); // true once first search runs
+
+  // ──────────────────────────────────────────────────────────────────
+  // AUTO-LOAD POPULAR RECIPES ON MOUNT
+  // useEffect with an empty [] runs exactly once when the page loads.
+  // We fetch recipes from multiple popular categories and combine them
+  // so the home page always has content — no searching required!
+  // ──────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    async function loadPopularRecipes() {
+      setIsLoading(true);
+      setError(null);
+      setIsShowingPopular(true);
+
+      try {
+        // Fetch 3 popular categories in parallel using Promise.all
+        // (runs all fetches at the same time instead of one by one)
+        const fetches = POPULAR_TERMS.slice(0, 4).map((term) =>
+          fetch(`${API_BASE}/search.php?s=${term}`).then((r) => r.json())
+        );
+
+        const results = await Promise.all(fetches);
+
+        // Combine all the meal arrays from each response
+        const combined = results.flatMap((data) => data.meals || []);
+
+        // Remove duplicate recipes (same idMeal can come from multiple searches)
+        const seen = new Set();
+        const unique = combined.filter((meal) => {
+          if (seen.has(meal.idMeal)) return false;
+          seen.add(meal.idMeal);
+          return true;
+        });
+
+        // Shuffle the results so each visit shows a fresh mix of recipes
+        const shuffled = unique.sort(() => Math.random() - 0.5);
+
+        setAllResults(shuffled);
+        setSearchedQuery('Popular Recipes');
+      } catch (err) {
+        setError('Could not load recipes. Please check your internet connection.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadPopularRecipes();
+  }, []); // empty array = run only once when component mounts
 
   // ────────────────────────────────────────────────
   // Fetch recipes from the API when the user searches
@@ -56,7 +111,7 @@ function Home({ isFavorite, onToggleFav }) {
   async function handleSearch(query) {
     setIsLoading(true);
     setError(null);
-    setHasSearched(true);
+    setIsShowingPopular(false);
     setSearchedQuery(query);
     setSelectedCategory('All');  // reset filter when a new search runs
     setVisibleCount(PAGE_SIZE);  // reset pagination
@@ -123,6 +178,11 @@ function Home({ isFavorite, onToggleFav }) {
     setVisibleCount(PAGE_SIZE);
   }, [selectedCategory]);
 
+  // Decide what label to show above the results grid
+  const resultsLabel = isShowingPopular
+    ? `Showing ${visibleResults.length} of ${filteredResults.length} popular recipes`
+    : `Showing ${visibleResults.length} of ${filteredResults.length} results for "${searchedQuery}"`;
+
   return (
     <main className="page">
       {/* ── Hero Banner ── */}
@@ -138,13 +198,27 @@ function Home({ isFavorite, onToggleFav }) {
 
         {/* Controlled search form */}
         <SearchBar onSearch={handleSearch} />
+
+        {/* Quick-search pill buttons so users can try popular terms */}
+        <div className="home-quick-searches">
+          <span className="home-quick-searches__label">Try:</span>
+          {['Chicken', 'Pasta', 'Sushi', 'Chocolate', 'Soup', 'Tacos'].map((term) => (
+            <button
+              key={term}
+              className="home-quick-searches__pill"
+              onClick={() => handleSearch(term)}
+            >
+              {term}
+            </button>
+          ))}
+        </div>
       </section>
 
       {/* ── Content area ── */}
       <section className="container">
 
         {/* ── Loading state ── */}
-        {isLoading && <LoadingSpinner message="Searching recipes…" />}
+        {isLoading && <LoadingSpinner message={isShowingPopular ? 'Loading popular recipes…' : 'Searching recipes…'} />}
 
         {/* ── Error state ── */}
         {!isLoading && error && (
@@ -152,36 +226,38 @@ function Home({ isFavorite, onToggleFav }) {
             <span className="home-error__icon">⚠️</span>
             <h2 className="home-error__title">Oops! Something went wrong</h2>
             <p className="home-error__message">{error}</p>
+            <button className="home-retry-btn" onClick={() => window.location.reload()}>
+              Try Again
+            </button>
           </div>
         )}
 
-        {/* ── Results (only shown after a search, when not loading or erroring) ── */}
-        {!isLoading && !error && hasSearched && (
+        {/* ── Results grid ── */}
+        {!isLoading && !error && allResults.length > 0 && (
           <>
-            {/* Filter bar + results count row */}
-            {allResults.length > 0 && (
-              <div className="home-controls">
-                <FilterBar
-                  selectedCategory={selectedCategory}
-                  onCategoryChange={setSelectedCategory}
-                />
-                <p className="home-results-count">
-                  Showing <strong>{visibleResults.length}</strong> of{' '}
-                  <strong>{filteredResults.length}</strong> results for &ldquo;
-                  {searchedQuery}&rdquo;
-                </p>
-              </div>
-            )}
+            {/* Section heading */}
+            <div className="home-section-header">
+              <h2 className="home-section-title">
+                {isShowingPopular ? '🔥 Popular Recipes' : `🔍 Results for "${searchedQuery}"`}
+              </h2>
+            </div>
 
-            {/* No results / empty state */}
+            {/* Filter bar + results count row */}
+            <div className="home-controls">
+              <FilterBar
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+              />
+              <p className="home-results-count">{resultsLabel}</p>
+            </div>
+
+            {/* No results after filtering */}
             {filteredResults.length === 0 && (
               <div className="home-empty">
                 <span className="home-empty__icon">🍽️</span>
                 <h2 className="home-empty__title">No recipes found</h2>
                 <p className="home-empty__subtitle">
-                  {allResults.length > 0
-                    ? `No ${selectedCategory} recipes in these results. Try a different filter.`
-                    : `We couldn't find anything for "${searchedQuery}". Try "pasta", "chicken", or "chocolate".`}
+                  No {selectedCategory} recipes found. Try a different filter or search.
                 </p>
               </div>
             )}
@@ -212,13 +288,13 @@ function Home({ isFavorite, onToggleFav }) {
           </>
         )}
 
-        {/* ── Welcome state (before first search) ── */}
-        {!isLoading && !error && !hasSearched && (
+        {/* ── No search results state ── */}
+        {!isLoading && !error && !isShowingPopular && allResults.length === 0 && (
           <div className="home-empty">
-            <span className="home-empty__icon">🔍</span>
-            <h2 className="home-empty__title">What are you craving today?</h2>
+            <span className="home-empty__icon">🍽️</span>
+            <h2 className="home-empty__title">No recipes found</h2>
             <p className="home-empty__subtitle">
-              Type a dish name or ingredient above and hit Search to get started!
+              We couldn&apos;t find anything for &ldquo;{searchedQuery}&rdquo;. Try &ldquo;pasta&rdquo;, &ldquo;chicken&rdquo;, or &ldquo;chocolate&rdquo;.
             </p>
           </div>
         )}
