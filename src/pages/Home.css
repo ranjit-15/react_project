@@ -1,0 +1,149 @@
+/* ────────────────────────────────────────────────────────────────────
+   Home.css — Layout and styles specific to the Home / Discover page
+   ──────────────────────────────────────────────────────────────────── */
+
+/* ── Hero banner at the top of the page ── */
+.home-hero {
+  text-align: center;
+  padding: var(--space-16) 0 var(--space-10);
+}
+
+.home-hero__eyebrow {
+  display: inline-block;
+  padding: var(--space-1) var(--space-4);
+  background-color: rgba(255, 107, 53, 0.15);
+  color: var(--color-primary);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-4);
+}
+
+.home-hero__title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--color-text);
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-4);
+}
+
+.home-hero__title span {
+  color: var(--color-primary);
+}
+
+.home-hero__subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-muted);
+  max-width: 540px;
+  margin: 0 auto var(--space-8);
+}
+
+/* ── Controls area: filter bar + results count ── */
+.home-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.home-results-count {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.home-results-count strong {
+  color: var(--color-text);
+}
+
+/* ── Recipe grid ── */
+.recipe-grid {
+  display: grid;
+  /* Auto-fill columns that are at least 260px wide */
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-6);
+}
+
+/* ── Empty state (no results found) ── */
+.home-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-16) 0;
+  text-align: center;
+}
+
+.home-empty__icon {
+  font-size: 4rem;
+}
+
+.home-empty__title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.home-empty__subtitle {
+  color: var(--color-text-muted);
+  max-width: 360px;
+}
+
+/* ── Error state ── */
+.home-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-16) 0;
+  text-align: center;
+}
+
+.home-error__icon {
+  font-size: 3rem;
+}
+
+.home-error__title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-danger);
+}
+
+.home-error__message {
+  color: var(--color-text-muted);
+  max-width: 400px;
+}
+
+/* ── "Load More" button ── */
+.home-load-more {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-10);
+}
+
+.home-load-more__btn {
+  padding: var(--space-3) var(--space-8);
+  background-color: var(--color-surface-2);
+  color: var(--color-text);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.home-load-more__btn:hover {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  transform: translateY(-2px);
+}
