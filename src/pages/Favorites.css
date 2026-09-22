@@ -1,0 +1,105 @@
+/* ────────────────────────────────────────────────────────────
+   Favorites.css — Styles specific to the Favorites page
+   ──────────────────────────────────────────────────────────── */
+
+/* ── Page header ── */
+.favorites-header {
+  margin-bottom: var(--space-8);
+}
+
+.favorites-header__title {
+  font-size: var(--font-size-3xl);
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-2);
+}
+
+.favorites-header__title span {
+  color: var(--color-primary);
+}
+
+.favorites-header__subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+}
+
+/* ── Empty state (user hasn't saved anything yet) ── */
+.favorites-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-16) 0;
+  text-align: center;
+}
+
+.favorites-empty__icon {
+  font-size: 5rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.1); }
+}
+
+.favorites-empty__title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.favorites-empty__subtitle {
+  color: var(--color-text-muted);
+  max-width: 360px;
+}
+
+/* ── Link back to the search page ── */
+.favorites-empty__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-6);
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.favorites-empty__cta:hover {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-2px);
+}
+
+/* ── Clear-all button ── */
+.favorites-clear-btn {
+  padding: var(--space-2) var(--space-5);
+  background-color: transparent;
+  color: var(--color-danger);
+  border: 1.5px solid var(--color-danger);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+  cursor: pointer;
+}
+
+.favorites-clear-btn:hover {
+  background-color: var(--color-danger);
+  color: white;
+}
+
+/* Header row with title + clear button */
+.favorites-header-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
