@@ -25,11 +25,11 @@ function Navbar({ favoritesCount }) {
   return (
     <header className="navbar">
       <div className="container navbar__inner">
-        {/* Brand logo */}
-        <NavLink to="/" className="navbar__brand" onClick={handleLinkClick}>
+        {/* Brand logo (clicking it refreshes the page) */}
+        <a href="/" className="navbar__brand" onClick={handleLinkClick}>
           <span className="navbar__brand-icon">🍽️</span>
           Recipe<span>Finder</span>
-        </NavLink>
+        </a>
 
         {/* Hamburger button — only visible on mobile */}
         <button

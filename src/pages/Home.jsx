@@ -1,15 +1,5 @@
 // Home.jsx
-// The main "Discover" page of the Recipe Finder app.
-//
-// What this page does:
-//   1. AUTO-LOADS popular recipes on first visit (useEffect on mount)
-//   2. Shows a hero banner with the search bar
-//   3. Lets the user filter results by category using FilterBar
-//   4. Fetches recipes from TheMealDB API when the user searches
-//   5. Displays results as RecipeCard components in a responsive grid
-//   6. Handles loading, error, and empty states with helpful UI
-//   7. "Load More" button to paginate through results
-//   8. Opens a RecipeModal when the user clicks a card
+// Main page component displaying the search interface and recipe grid.
 
 import { useState, useEffect } from 'react';
 import SearchBar from '../components/SearchBar';
@@ -58,12 +48,7 @@ function Home({ isFavorite, onToggleFav }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // ──────────────────────────────────────────────────────────────────
-  // AUTO-LOAD POPULAR RECIPES ON MOUNT
-  // useEffect with an empty [] runs exactly once when the page loads.
-  // We fetch recipes from multiple popular categories and combine them
-  // so the home page always has content — no searching required!
-  // ──────────────────────────────────────────────────────────────────
+  // Auto-load popular recipes on mount
   useEffect(() => {
     async function loadPopularRecipes() {
       setIsLoading(true);
@@ -105,9 +90,7 @@ function Home({ isFavorite, onToggleFav }) {
     loadPopularRecipes();
   }, []); // empty array = run only once when component mounts
 
-  // ────────────────────────────────────────────────
-  // Fetch recipes from the API when the user searches
-  // ────────────────────────────────────────────────
+  // Fetch recipes by search query
   async function handleSearch(query) {
     setIsLoading(true);
     setError(null);
@@ -134,10 +117,7 @@ function Home({ isFavorite, onToggleFav }) {
     }
   }
 
-  // ──────────────────────────────────────────────────────
-  // Fetch the FULL detail of a meal so the modal has all
-  // ingredient + instruction data (search results are brief)
-  // ──────────────────────────────────────────────────────
+  // Fetch full meal details for the modal
   async function handleSelectMeal(meal) {
     try {
       const response = await fetch(`${API_BASE}/lookup.php?i=${meal.idMeal}`);
@@ -151,10 +131,7 @@ function Home({ isFavorite, onToggleFav }) {
     }
   }
 
-  // ──────────────────────────────────────────────────────
-  // Filter the results by the selected category.
-  // "All" means no filter — return every result.
-  // ──────────────────────────────────────────────────────
+  // Filter results by category
   const filteredResults =
     selectedCategory === 'All'
       ? allResults
